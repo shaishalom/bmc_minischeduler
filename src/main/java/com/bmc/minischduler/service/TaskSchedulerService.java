@@ -1,10 +1,11 @@
 package com.bmc.minischduler.service;
 
+import com.bmc.minischduler.job.JobFactory;
+import com.bmc.minischduler.job.TaskJob;
 import com.bmc.minischduler.model.Catalog;
 import com.bmc.minischduler.model.SchedulerTask;
-import com.bmc.minischduler.job.TaskJob;
-import com.bmc.minischduler.job.JobFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -14,8 +15,6 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.quartz.Scheduler;
 
 //TODO handle return code fro jobs
 //update completedTasks after finish
@@ -41,27 +40,37 @@ public class TaskSchedulerService {
     /**
      * check if task did not run today
      * @param task
-     * @param completedTasks
      * @return
      */
-    private boolean isTaskReady(SchedulerTask task, Map<Integer, Boolean> completedTasks) {
+    private boolean isTaskReady(SchedulerTask task) {
         //TODO handle in case time is empty and based on other task
         if (task.basedOn().isEmpty() && task.time().isEmpty()) {
             return false;
         }
+        //if task already handled
+        if (completedTasksMap.getOrDefault(task.id(),false)) {
+            return false;
+        }
+
         LocalTime taskTime = LocalTime.parse(task.time());
+        //if current time is after time task, and based on is empty
         if (LocalTime.now().isAfter(LocalTime.now().withHour(taskTime.getHour()).withMinute(taskTime.getMinute())) &&
-                (task.basedOn().isEmpty() ||  completedTasks.getOrDefault(task.basedOn(), true))) {
+                (task.basedOn().isEmpty() )) {
             return true;
-        } else if (!task.basedOn().isEmpty() && !completedTasks.getOrDefault(task.basedOn(),false)) {
-            System.out.println("Task " + task.id() + " is waiting for Task " + task.basedOn() + " to be done");
+            //if based on is not empty , and not done in completed task
+        } else if (!task.basedOn().isEmpty() && !completedTasksMap.getOrDefault(task.basedOn(),false)) {
+            log.info("Task " + task.id() + " is waiting for Task " + task.basedOn() + " to be done");
             return false;
         }
         return false;
     }
 
 //TODO
-    //@Scheduled(fixedRate = 10000) //everymidnoght clean completedTasksMap
+    //@Scheduled(fixedRate = 10000) //every midnight clean completedTasksMap
+    @Scheduled(cron = "0 0 0 0 0 0") // Schedule a check every 10 seconds (adjust as needed)
+    public void cleanMap () throws Exception {
+        completedTasksMap.clear();
+    }
 
     @Scheduled(fixedRate = 10000) // Schedule a check every 10 seconds (adjust as needed)
     public void runTasks() throws Exception {
@@ -70,15 +79,15 @@ public class TaskSchedulerService {
 
         for (SchedulerTask task : tasks) {
             // Check if task is ready (consider time, prerequisites, etc.)
-            if (isTaskReady(task, completedTasksMap)) {
+            if (isTaskReady(task)) {
                 runTask(task);
             }
         }
     }
 
 
+
     /**
-     * do it every day
      * @throws IOException
      */
     public void init() throws IOException {
