@@ -1,0 +1,28 @@
+<Catalog>
+	<schedulerTask>
+		<schedulerTask>
+			<id>1</id>
+			<name>Print Command</name>
+			<type>COMMAND</type>
+			<details>echo task 1</details>
+			<time>18:30</time>
+			<basedOn></basedOn>
+		</schedulerTask>
+		<schedulerTask>
+			<id>2</id>
+			<name>Print Command</name>
+			<type>COMMAND</type>
+			<details>echo task 2</details>
+			<time>10:00</time>
+			<basedOn></basedOn>
+		</schedulerTask>
+		<schedulerTask>
+			<id>3</id>
+			<name>Run Script</name>
+			<type>SCRIPT</type>
+			<details>c:\example.bat</details>
+			<time>10:30</time>
+			<basedOn>2</basedOn>
+		</schedulerTask>
+	</schedulerTask>
+</Catalog>

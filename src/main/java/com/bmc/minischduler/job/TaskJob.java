@@ -1,4 +1,4 @@
-package com.bmc.minischduler.service.job;
+package com.bmc.minischduler.job;
 
 import org.quartz.Job;
 
