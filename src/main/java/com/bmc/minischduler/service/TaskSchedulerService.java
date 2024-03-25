@@ -130,7 +130,7 @@ public class TaskSchedulerService {
     }
 
     public void runTask(SchedulerTask schedulerTask){
-
+        //TODO need to create it by thread (ServiceExecuted)
         TaskJob job = JobFactory.createJob(schedulerTask);
         try {
             job.execute(null);
