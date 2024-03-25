@@ -1,0 +1,1 @@
+{"schedulerTask":[{"id":"1","name":"Print Command","type":"COMMAND","details":"echo task 1","time":"18:30","basedOn":""},{"id":"2","name":"Print Command","type":"COMMAND","details":"echo task 2","time":"10:00","basedOn":""}]}
